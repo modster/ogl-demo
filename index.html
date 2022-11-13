@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <meta
+      name="viewport"
+      content="width=device-width, minimal-ui, viewport-fit=cover, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no"
+    />
+    <title>OGL • Template</title>
+    <style>
+      :root {
+        overflow: hidden;
+        height: 100%;
+      }
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="module">
+      import {
+        Renderer,
+        Camera,
+        Transform,
+        Box,
+        Program,
+        Mesh
+      } from "https://unpkg.com/ogl";
+
+      {
+        const renderer = new Renderer();
+        const gl = renderer.gl;
+        document.body.appendChild(gl.canvas);
+
+        const camera = new Camera(gl);
+        camera.position.z = 5;
+
+        function resize() {
+          renderer.setSize(window.innerWidth, window.innerHeight);
+          camera.perspective({
+            aspect: gl.canvas.width / gl.canvas.height
+          });
+        }
+        window.addEventListener("resize", resize, false);
+        resize();
+
+        const scene = new Transform();
+
+        const geometry = new Box(gl);
+
+        const program = new Program(gl, {
+          vertex: `
+            attribute vec3 position;
+
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+
+            void main() {
+              gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+            `,
+          fragment: `
+            void main() {
+              gl_FragColor = vec4(1.0);
+            }
+            `
+        });
+
+        const mesh = new Mesh(gl, { geometry, program });
+        mesh.setParent(scene);
+
+        requestAnimationFrame(update);
+        function update(t) {
+          requestAnimationFrame(update);
+
+          mesh.rotation.y -= 0.04;
+          mesh.rotation.x += 0.03;
+          renderer.render({ scene, camera });
+        }
+      }
+    </script>
+  </body>
+</html>
